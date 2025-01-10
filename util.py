@@ -9,7 +9,7 @@ class ReplayBuffer:
 
     def push(self, state, action, reward, next_state, done):
         # Verifica las formas de los estados antes de agregarlos al buffer
-        print(f"Push: State shape {state.shape}, Next state shape {next_state.shape}")
+        # print(f"Push: State shape {state.shape}, Next state shape {next_state.shape}")
         self.buffer.append((
             np.array(state).squeeze(),  # Quitar dimensiones adicionales si las hay
             action,
@@ -22,7 +22,7 @@ class ReplayBuffer:
         batch = random.sample(self.buffer, batch_size)
         states, actions, rewards, next_states, dones = zip(*batch)
         # Verifica las formas de los estados al muestrear del buffer
-        print(f"Sample: State shape {np.array(states).shape}, Next state shape {np.array(next_states).shape}")
+        # print(f"Sample: State shape {np.array(states).shape}, Next state shape {np.array(next_states).shape}")
 
         return (
             np.array(states),  # Mantener forma consistente
