@@ -8,16 +8,27 @@ class ReplayBuffer:
         self.buffer = deque(maxlen=capacity)
 
     def push(self, state, action, reward, next_state, done):
-        self.buffer.append((state, action, reward, next_state, done))
+        # Verifica las formas de los estados antes de agregarlos al buffer
+        print(f"Push: State shape {state.shape}, Next state shape {next_state.shape}")
+        self.buffer.append((
+            np.array(state).squeeze(),  # Quitar dimensiones adicionales si las hay
+            action,
+            reward,
+            np.array(next_state).squeeze(),  # Quitar dimensiones adicionales si las hay
+            done
+        ))
 
     def sample(self, batch_size):
         batch = random.sample(self.buffer, batch_size)
         states, actions, rewards, next_states, dones = zip(*batch)
+        # Verifica las formas de los estados al muestrear del buffer
+        print(f"Sample: State shape {np.array(states).shape}, Next state shape {np.array(next_states).shape}")
+
         return (
-            np.array(states),
+            np.array(states),  # Mantener forma consistente
             np.array(actions),
             np.array(rewards),
-            np.array(next_states),
+            np.array(next_states),  # Mantener forma consistente
             np.array(dones),
         )
 
@@ -25,7 +36,6 @@ class ReplayBuffer:
         return len(self.buffer)
 
 def plot_metrics(rewards, losses, save_path="runs/logs"):
-    # Recompensas por episodio
     plt.figure(figsize=(10, 5))
     plt.plot(rewards, label="Reward")
     plt.xlabel("Episodes")
@@ -35,7 +45,6 @@ def plot_metrics(rewards, losses, save_path="runs/logs"):
     plt.savefig(f"{save_path}/rewards.png")
     plt.close()
 
-    # Pérdidas durante el entrenamiento
     plt.figure(figsize=(10, 5))
     plt.plot(losses, label="Loss")
     plt.xlabel("Steps")

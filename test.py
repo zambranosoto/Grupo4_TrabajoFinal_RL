@@ -2,18 +2,21 @@ import numpy as np
 import torch
 import matplotlib.pyplot as plt
 
-def evaluate_agent(env, policy_net, num_episodes, render=False):
+def evaluate_agent(env, policy_net, num_episodes, device, render=False):
     total_rewards = []
 
     for episode in range(num_episodes):
         state, _ = env.reset()
+        state = torch.FloatTensor(state).to(device).permute(2, 0, 1).unsqueeze(0)  # (1, C, H, W)
         episode_reward = 0
 
         while True:
             with torch.no_grad():
-                action = torch.argmax(policy_net(torch.FloatTensor(state))).item()
+                action = torch.argmax(policy_net(state)).item()
 
-            state, reward, done, _, _ = env.step(action)
+            next_state, reward, done, _, _ = env.step(action)
+            next_state = torch.FloatTensor(next_state).to(device).permute(2, 0, 1).unsqueeze(0)
+            state = next_state
             episode_reward += reward
 
             if render:
@@ -26,17 +29,9 @@ def evaluate_agent(env, policy_net, num_episodes, render=False):
         print(f"Episode {episode}: Reward = {episode_reward}")
 
     avg_reward = np.mean(total_rewards)
-    std_reward = np.std(total_rewards)
+    print(f"\nEvaluation Results: Average Reward = {avg_reward:.2f}")
 
-    print(f"\nEvaluation Results: Average Reward = {avg_reward:.2f}, Std Dev = {std_reward:.2f}")
-
-    # Gráfico de recompensas durante la evaluación
-    plt.figure(figsize=(10, 5))
-    plt.bar(range(num_episodes), total_rewards, label="Reward per Episode")
-    plt.axhline(y=avg_reward, color='r', linestyle='--', label=f"Avg Reward = {avg_reward:.2f}")
-    plt.xlabel("Episodes")
-    plt.ylabel("Reward")
-    plt.title("Evaluation Rewards")
-    plt.legend()
+    plt.bar(range(num_episodes), total_rewards)
+    plt.axhline(avg_reward, color="r", linestyle="--")
     plt.savefig("runs/logs/evaluation_rewards.png")
     plt.close()

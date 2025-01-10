@@ -1,41 +1,30 @@
 import torch.nn as nn
 import torch
 
-"""
 class DQN(nn.Module):
-    def __init__(self, action_space):
+    def __init__(self, input_channels, num_actions):
         super(DQN, self).__init__()
-        self.fc = nn.Sequential(
-            nn.Linear(84 * 84 * 4, 512),  # Procesamos imágenes de 4 frames.
-            nn.ReLU(),
-            nn.Linear(512, action_space)  # Salida: acciones posibles.
-        )
-
-    def forward(self, x):
-        return self.fc(x.view(x.size(0), -1))  # Aplanar la entrada.
-"""
-
-class DQN(nn.Module):
-    def __init__(self, action_space):
-        super(DQN, self).__init__()
-        self.conv1 = nn.Conv2d(4, 32, kernel_size=8, stride=4)
+        self.conv1 = nn.Conv2d(input_channels, 32, kernel_size=8, stride=4)
         self.conv2 = nn.Conv2d(32, 64, kernel_size=4, stride=2)
         self.conv3 = nn.Conv2d(64, 64, kernel_size=3, stride=1)
-        self.fc1 = nn.Linear(64 * 7 * 7, 512)
-        self.fc2 = nn.Linear(512, action_space)
+        # Ajusta la dimensión de entrada de fc1 a 64 * 16 * 22
+        self.fc1 = nn.Linear(64 * 16 * 22, 512)
+        self.fc2 = nn.Linear(512, num_actions)
 
     def forward(self, x):
         x = nn.ReLU()(self.conv1(x))
         x = nn.ReLU()(self.conv2(x))
         x = nn.ReLU()(self.conv3(x))
-        x = x.view(x.size(0), -1)
+        # print(f"Output shape after conv3: {x.shape}")  # Agrega esta línea temporalmente
+        x = x.view(x.size(0), -1)  # Aplanar el tensor
         x = nn.ReLU()(self.fc1(x))
-        return self.fc2(x)
+        x = self.fc2(x)
+        return x
 
 def save_model(model, path):
     torch.save(model.state_dict(), path)
 
-def load_model(path, action_space):
-    model = DQN(action_space)
-    model.load_state_dict(torch.load(path))
+def load_model(path, action_space, device):
+    model = DQN(input_channels=3, num_actions=action_space).to(device)
+    model.load_state_dict(torch.load(path, map_location=device))
     return model
