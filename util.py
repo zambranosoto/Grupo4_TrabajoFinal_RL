@@ -2,6 +2,7 @@ import random
 from collections import deque
 import numpy as np
 import matplotlib.pyplot as plt
+import torch
 
 class ReplayBuffer:
     def __init__(self, capacity):
@@ -11,10 +12,10 @@ class ReplayBuffer:
         # Verifica las formas de los estados antes de agregarlos al buffer
         # print(f"Push: State shape {state.shape}, Next state shape {next_state.shape}")
         self.buffer.append((
-            np.array(state).squeeze(),  # Quitar dimensiones adicionales si las hay
+            np.array(state, dtype=np.float16).squeeze(),
             action,
             reward,
-            np.array(next_state).squeeze(),  # Quitar dimensiones adicionales si las hay
+            np.array(next_state, dtype=np.float16).squeeze(),
             done
         ))
 
@@ -24,13 +25,38 @@ class ReplayBuffer:
         # Verifica las formas de los estados al muestrear del buffer
         # print(f"Sample: State shape {np.array(states).shape}, Next state shape {np.array(next_states).shape}")
 
-        return (
-            np.array(states),  # Mantener forma consistente
-            np.array(actions),
-            np.array(rewards),
-            np.array(next_states),  # Mantener forma consistente
-            np.array(dones),
-        )
+        # Convertir a arrays de numpy en float16 para ahorrar memoria
+        states = np.array(states, dtype=np.float16)
+        actions = np.array(actions, dtype=np.int64)  # torch.long equivale a int64
+        rewards = np.array(rewards, dtype=np.float16)
+        next_states = np.array(next_states, dtype=np.float16)
+        dones = np.array(dones, dtype=np.float16)
+
+        # Convertir a tensores en float16 para la GPU
+        states = torch.tensor(states, dtype=torch.float16).to('cuda')
+        actions = torch.tensor(actions, dtype=torch.long).to('cuda')
+        rewards = torch.tensor(rewards, dtype=torch.float16).to('cuda')
+        next_states = torch.tensor(next_states, dtype=torch.float16).to('cuda')
+        dones = torch.tensor(dones, dtype=torch.float16).to('cuda')
+        """
+        states = np.array(states)
+        actions = np.array(actions)
+        rewards = np.array(rewards)
+        next_states = np.array(next_states)
+        dones = np.array(dones)
+        
+        states = torch.tensor(np.array(states), dtype=torch.float16)
+        actions = torch.tensor(np.array(actions), dtype=torch.long)
+        rewards = torch.tensor(np.array(rewards), dtype=torch.float16)
+        next_states = torch.tensor(np.array(next_states), dtype=torch.float16)
+        dones = torch.tensor(np.array(dones), dtype=torch.float16)
+        """
+
+        # Forzar la recolección de basura
+        import gc
+        gc.collect()
+
+        return states, actions, rewards, next_states, dones
 
     def __len__(self):
         return len(self.buffer)

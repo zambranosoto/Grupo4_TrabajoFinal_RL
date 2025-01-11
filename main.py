@@ -12,7 +12,10 @@ if __name__ == "__main__":
     os.makedirs("runs/models", exist_ok=True)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    env = gym.make("ALE/Seaquest-v5", render_mode="rgb_array")
+    print(f"device: {device}")
+
+    # env = gym.make("ALE/Seaquest-v5", render_mode="rgb_array")
+    env = gym.make("ALE/Seaquest-v5", render_mode="human")
     action_space = env.action_space.n
 
     policy_net = DQN(input_channels=3, num_actions=action_space).to(device)
