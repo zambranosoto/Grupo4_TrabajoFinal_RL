@@ -9,8 +9,6 @@ class ReplayBuffer:
         self.buffer = deque(maxlen=capacity)
 
     def push(self, state, action, reward, next_state, done):
-        # Verifica las formas de los estados antes de agregarlos al buffer
-        # print(f"Push: State shape {state.shape}, Next state shape {next_state.shape}")
         self.buffer.append((
             np.array(state, dtype=np.float16).squeeze(),
             action,
@@ -22,8 +20,6 @@ class ReplayBuffer:
     def sample(self, batch_size):
         batch = random.sample(self.buffer, batch_size)
         states, actions, rewards, next_states, dones = zip(*batch)
-        # Verifica las formas de los estados al muestrear del buffer
-        # print(f"Sample: State shape {np.array(states).shape}, Next state shape {np.array(next_states).shape}")
 
         # Convertir a arrays de numpy en float16 para ahorrar memoria
         states = np.array(states, dtype=np.float16)
@@ -38,19 +34,6 @@ class ReplayBuffer:
         rewards = torch.tensor(rewards, dtype=torch.float16).to('cuda')
         next_states = torch.tensor(next_states, dtype=torch.float16).to('cuda')
         dones = torch.tensor(dones, dtype=torch.float16).to('cuda')
-        """
-        states = np.array(states)
-        actions = np.array(actions)
-        rewards = np.array(rewards)
-        next_states = np.array(next_states)
-        dones = np.array(dones)
-        
-        states = torch.tensor(np.array(states), dtype=torch.float16)
-        actions = torch.tensor(np.array(actions), dtype=torch.long)
-        rewards = torch.tensor(np.array(rewards), dtype=torch.float16)
-        next_states = torch.tensor(np.array(next_states), dtype=torch.float16)
-        dones = torch.tensor(np.array(dones), dtype=torch.float16)
-        """
 
         # Forzar la recolección de basura
         import gc
@@ -68,7 +51,7 @@ def plot_metrics(rewards, losses, save_path="runs/logs"):
     plt.ylabel("Total Reward")
     plt.title("Rewards over Episodes")
     plt.legend()
-    plt.savefig(f"{save_path}/rewards.png")
+    plt.savefig(f"{save_path}/rewards_2.png")
     plt.close()
 
     plt.figure(figsize=(10, 5))
@@ -77,5 +60,5 @@ def plot_metrics(rewards, losses, save_path="runs/logs"):
     plt.ylabel("Loss")
     plt.title("Loss over Training Steps")
     plt.legend()
-    plt.savefig(f"{save_path}/losses.png")
+    plt.savefig(f"{save_path}/losses_2.png")
     plt.close()

@@ -12,6 +12,7 @@ def train_dqn(env, policy_net, target_net, config, device):
     optimizer = optim.Adam(policy_net.parameters(), lr=config["lr"])
     buffer = ReplayBuffer(config["buffer_size"])
     rewards, losses = [], []
+    lives = 4
 
     for episode in range(config["episodes"]):
         state, _ = env.reset()
@@ -31,8 +32,39 @@ def train_dqn(env, policy_net, target_net, config, device):
                 with torch.no_grad(), autocast('cuda'):
                     action = torch.argmax(policy_net(state)).item()
 
-            next_state, reward, done, _, _ = env.step(action)
+            next_state, reward, done, is_tr, info = env.step(action)
+            """
+            print(f"reward: {reward}")
+            print(f"done: {done}")
+            print(f"is_tr: {is_tr}")
+            print(f"info: {info}")
+            print(f"next state: {next_state}")
+            
+            print(f"env {dir(env.step(action))}")
+            print(f"unwrapped: {dir(env.unwrapped.ale)}")
+            print(f"env: {dir(env)}")
+            print(f"env.get_wrapper_attr: {dir(env.get_wrapper_attr)}")
+            print(f"env.observation_space: {dir(env.get_wrapper_attr)}")
+            print(f"env.spec: {dir(env.get_wrapper_attr)}")
+            print(f"env.wrapper_spec: {dir(env.get_wrapper_attr)}")
+            print(f"env.action_space: {dir(env.get_wrapper_attr)}")
+            print(f"env.metadata: {dir(env.metadata)}")
+            print(f"env.render: {dir(env.render)}")"""
+
+
             next_state = torch.FloatTensor(next_state).to(device).permute(2, 1, 0).unsqueeze(0).half()
+
+            # Implementar recompensas adicionales
+            # Recompensa por sobrevivir
+            reward += 1
+            # Ejemplo: Recompensa por acciones específicas (rescatar buzos)
+            if info["lives"] < lives:
+                reward -= 10
+                lives = info["lives"]
+            # Ejemplo: Penalización por colisiones
+            # if "hit_enemy" in info and info["hit_enemy"]:
+                # reward -= 10
+
             buffer.push(state.cpu().numpy(), action, reward, next_state.cpu().numpy(), done)
 
             state = next_state
@@ -53,6 +85,7 @@ def train_dqn(env, policy_net, target_net, config, device):
 
             if done:
                 print(f"Episode {episode + 1}/{config['episodes']}, Step {t + 1}/{config['max_steps']}: Reward = {episode_reward}, Epsilon = {epsilon:.3f}")
+                lives = 4
                 break
 
         rewards.append(episode_reward)

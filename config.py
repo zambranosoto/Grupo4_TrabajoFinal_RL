@@ -3,7 +3,7 @@ CONFIG = {
     "gamma": 0.99,
     "epsilon_start": 1.0,
     "epsilon_min": 0.1,
-    "epsilon_decay": 500,
+    "epsilon_decay": 1000,
     "episodes": 500,
     "buffer_size": 50000,
     "batch_size": 16,
