@@ -51,7 +51,7 @@ def plot_metrics(rewards, losses, save_path="runs/logs"):
     plt.ylabel("Total Reward")
     plt.title("Rewards over Episodes")
     plt.legend()
-    plt.savefig(f"{save_path}/rewards_2.png")
+    plt.savefig(f"{save_path}/rewards_4.png")
     plt.close()
 
     plt.figure(figsize=(10, 5))
@@ -60,5 +60,5 @@ def plot_metrics(rewards, losses, save_path="runs/logs"):
     plt.ylabel("Loss")
     plt.title("Loss over Training Steps")
     plt.legend()
-    plt.savefig(f"{save_path}/losses_2.png")
+    plt.savefig(f"{save_path}/losses_4.png")
     plt.close()

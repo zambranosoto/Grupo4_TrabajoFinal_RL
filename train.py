@@ -20,6 +20,7 @@ def train_dqn(env, policy_net, target_net, config, device):
         state = torch.tensor(state, dtype=torch.float16).to(device).permute(2, 1, 0).unsqueeze(0)
 
         episode_reward = 0
+        sum_reward = 0
 
         for t in range(config["max_steps"]):
             epsilon = max(
@@ -33,42 +34,25 @@ def train_dqn(env, policy_net, target_net, config, device):
                     action = torch.argmax(policy_net(state)).item()
 
             next_state, reward, done, is_tr, info = env.step(action)
-            """
-            print(f"reward: {reward}")
-            print(f"done: {done}")
-            print(f"is_tr: {is_tr}")
-            print(f"info: {info}")
-            print(f"next state: {next_state}")
-            
-            print(f"env {dir(env.step(action))}")
-            print(f"unwrapped: {dir(env.unwrapped.ale)}")
-            print(f"env: {dir(env)}")
-            print(f"env.get_wrapper_attr: {dir(env.get_wrapper_attr)}")
-            print(f"env.observation_space: {dir(env.get_wrapper_attr)}")
-            print(f"env.spec: {dir(env.get_wrapper_attr)}")
-            print(f"env.wrapper_spec: {dir(env.get_wrapper_attr)}")
-            print(f"env.action_space: {dir(env.get_wrapper_attr)}")
-            print(f"env.metadata: {dir(env.metadata)}")
-            print(f"env.render: {dir(env.render)}")"""
-
 
             next_state = torch.FloatTensor(next_state).to(device).permute(2, 1, 0).unsqueeze(0).half()
 
             # Implementar recompensas adicionales
             # Recompensa por sobrevivir
-            reward += 1
-            # Ejemplo: Recompensa por acciones específicas (rescatar buzos)
+            if info["lives"] == lives:
+                sum_reward += 1
+            # Penalización por perder vidas
             if info["lives"] < lives:
-                reward -= 10
+                sum_reward -= 10
                 lives = info["lives"]
-            # Ejemplo: Penalización por colisiones
-            # if "hit_enemy" in info and info["hit_enemy"]:
-                # reward -= 10
+            # Recompensa por rescatar buzo o matar tiburón
+            if reward > 0:
+                sum_reward += (reward * 1.25)
 
             buffer.push(state.cpu().numpy(), action, reward, next_state.cpu().numpy(), done)
 
             state = next_state
-            episode_reward += reward
+            episode_reward += sum_reward
 
             if len(buffer) >= config["batch_size"]:
                 batch = buffer.sample(config["batch_size"])
