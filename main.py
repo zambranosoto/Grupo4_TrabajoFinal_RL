@@ -16,8 +16,8 @@ if __name__ == "__main__":
 
     # env = gym.make("ALE/Seaquest-v5", render_mode="rgb_array")
     # env = gym.make("ALE/Seaquest-v5", render_mode="human")
-    # env = gym.make("SeaquestNoFrameskip-v4", render_mode="human")
-    env = gym.make("SeaquestNoFrameskip-v4", render_mode="rgb_array")
+    env = gym.make("SeaquestNoFrameskip-v4", render_mode="human")
+    # env = gym.make("SeaquestNoFrameskip-v4", render_mode="rgb_array")
     action_space = env.action_space.n
 
     policy_net = DQN(input_channels=3, num_actions=action_space).to(device)
@@ -32,5 +32,5 @@ if __name__ == "__main__":
         print("Training complete. Model saved.")
 
     elif mode == "test":
-        model = load_model("runs/models/seaquest_dqn_2.pth", action_space, device)
+        model = load_model("runs/models/seaquest_dqn_4.pth", action_space, device)
         evaluate_agent(env, model, num_episodes=10, device=device, render=True)

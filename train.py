@@ -34,7 +34,7 @@ def train_dqn(env, policy_net, target_net, config, device):
                     action = torch.argmax(policy_net(state)).item()
 
             next_state, reward, done, is_tr, info = env.step(action)
-
+            # print(info.keys())
             next_state = torch.FloatTensor(next_state).to(device).permute(2, 1, 0).unsqueeze(0).half()
 
             # Implementar recompensas adicionales
