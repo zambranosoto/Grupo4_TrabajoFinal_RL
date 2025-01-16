@@ -6,7 +6,29 @@ from torch.amp import autocast, GradScaler
 from util import ReplayBuffer, plot_metrics
 import numpy as np
 
+
 def train_dqn(env, policy_net, target_net, config, device):
+    """
+    Entrena la Red Neuronal Profunda (DQN) en el entorno especificado.
+
+    Parámetros:
+    -----------
+    env : gym.Env
+        El entorno de entrenamiento.
+    policy_net : DQN
+        El modelo DQN para la política.
+    target_net : DQN
+        El modelo DQN objetivo.
+    config : dict
+        Diccionario de configuración con hiperparámetros.
+    device : torch.device
+        El dispositivo (CPU o GPU) en el cual se entrenará el modelo.
+
+    Retorna:
+    --------
+    list, list
+        Listas con las recompensas y pérdidas durante el entrenamiento.
+    """
     scaler = GradScaler()
 
     optimizer = optim.Adam(policy_net.parameters(), lr=config["lr"])
@@ -34,10 +56,9 @@ def train_dqn(env, policy_net, target_net, config, device):
                     action = torch.argmax(policy_net(state)).item()
 
             next_state, reward, done, is_tr, info = env.step(action)
-            # print(info.keys())
+
             next_state = torch.FloatTensor(next_state).to(device).permute(2, 1, 0).unsqueeze(0).half()
 
-            # Implementar recompensas adicionales
             # Recompensa por sobrevivir
             if info["lives"] == lives:
                 sum_reward += 1
@@ -68,7 +89,8 @@ def train_dqn(env, policy_net, target_net, config, device):
                 losses.append(loss.item())
 
             if done:
-                print(f"Episode {episode + 1}/{config['episodes']}, Step {t + 1}/{config['max_steps']}: Reward = {episode_reward}, Epsilon = {epsilon:.3f}")
+                print(
+                    f"Episode {episode + 1}/{config['episodes']}, Step {t + 1}/{config['max_steps']}: Reward = {episode_reward}, Epsilon = {epsilon:.3f}")
                 lives = 4
                 break
 
@@ -85,7 +107,29 @@ def train_dqn(env, policy_net, target_net, config, device):
 
     return rewards, losses
 
+
 def compute_loss(policy_net, target_net, batch, gamma, device):
+    """
+    Calcula la pérdida (loss) de la Red Neuronal Profunda (DQN).
+
+    Parámetros:
+    -----------
+    policy_net : DQN
+        El modelo DQN para la política.
+    target_net : DQN
+        El modelo DQN objetivo.
+    batch : tuple
+        Un lote de muestras del buffer de repetición.
+    gamma : float
+        Factor de descuento para el cálculo de la pérdida.
+    device : torch.device
+        El dispositivo (CPU o GPU) en el cual se calculará la pérdida.
+
+    Retorna:
+    --------
+    torch.Tensor
+        La pérdida (loss) calculada.
+    """
     states, actions, rewards, next_states, dones = batch
 
     states = states.clone().detach().to(device).half()

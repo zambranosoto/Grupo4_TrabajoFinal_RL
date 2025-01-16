@@ -8,16 +8,20 @@ from config import CONFIG
 import os
 
 if __name__ == "__main__":
+    """
+    - Configura y ejecuta el entrenamiento o prueba del modelo DQN.
+    - Crea directorios para guardar logs y modelos.
+    - Inicializa el entorno y los modelos.
+    - Pregunta al usuario si desea entrenar (train) o probar el modelo (test).
+    """
     os.makedirs("runs/logs", exist_ok=True)
     os.makedirs("runs/models", exist_ok=True)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"device: {device}")
 
-    # env = gym.make("ALE/Seaquest-v5", render_mode="rgb_array")
-    # env = gym.make("ALE/Seaquest-v5", render_mode="human")
     env = gym.make("SeaquestNoFrameskip-v4", render_mode="human")
-    # env = gym.make("SeaquestNoFrameskip-v4", render_mode="rgb_array")
+
     action_space = env.action_space.n
 
     policy_net = DQN(input_channels=3, num_actions=action_space).to(device)

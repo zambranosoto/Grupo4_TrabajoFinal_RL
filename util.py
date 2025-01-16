@@ -5,10 +5,52 @@ import matplotlib.pyplot as plt
 import torch
 
 class ReplayBuffer:
+    """
+    Clase para el buffer de repetición, que almacena experiencias de entrenamiento.
+
+    Atributos:
+    ----------
+    buffer : deque
+        Un buffer de doble extremo (deque) para almacenar las experiencias.
+
+    Métodos:
+    --------
+    push(state, action, reward, next_state, done):
+        Añade una experiencia al buffer.
+    sample(batch_size):
+        Muestra un lote de experiencias del buffer.
+    __len__():
+        Retorna el tamaño del buffer.
+    """
+
     def __init__(self, capacity):
+        """
+        Inicializa el buffer de repetición con una capacidad específica.
+
+        Parámetros:
+        -----------
+        capacity : int
+            La capacidad máxima del buffer.
+        """
         self.buffer = deque(maxlen=capacity)
 
     def push(self, state, action, reward, next_state, done):
+        """
+        Añade una experiencia al buffer.
+
+        Parámetros:
+        -----------
+        state : np.array
+            El estado actual.
+        action : int
+            La acción tomada.
+        reward : float
+            La recompensa recibida.
+        next_state : np.array
+            El siguiente estado.
+        done : bool
+            Indicador de si el episodio ha terminado.
+        """
         self.buffer.append((
             np.array(state, dtype=np.float16).squeeze(),
             action,
@@ -18,6 +60,19 @@ class ReplayBuffer:
         ))
 
     def sample(self, batch_size):
+        """
+        Muestra un lote de experiencias del buffer.
+
+        Parámetros:
+        -----------
+        batch_size : int
+            El tamaño del lote a muestrear.
+
+        Retorna:
+        --------
+        tuple
+            Un lote de experiencias (estados, acciones, recompensas, siguientes estados, dones).
+        """
         batch = random.sample(self.buffer, batch_size)
         states, actions, rewards, next_states, dones = zip(*batch)
 
@@ -42,9 +97,29 @@ class ReplayBuffer:
         return states, actions, rewards, next_states, dones
 
     def __len__(self):
+        """
+        Retorna el tamaño actual del buffer.
+
+        Retorna:
+        --------
+        int
+            El número de experiencias almacenadas en el buffer.
+        """
         return len(self.buffer)
 
 def plot_metrics(rewards, losses, save_path="runs/logs"):
+    """
+    Grafica las recompensas y pérdidas durante el entrenamiento.
+
+    Parámetros:
+    -----------
+    rewards : list
+        Lista de recompensas acumuladas por episodio.
+    losses : list
+        Lista de pérdidas acumuladas por paso.
+    save_path : str
+        La ruta donde se guardarán las gráficas.
+    """
     plt.figure(figsize=(10, 5))
     plt.plot(rewards, label="Reward")
     plt.xlabel("Episodes")

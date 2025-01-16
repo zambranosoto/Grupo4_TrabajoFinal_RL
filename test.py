@@ -3,6 +3,26 @@ import torch
 import matplotlib.pyplot as plt
 
 def evaluate_agent(env, policy_net, num_episodes, device, render=False):
+    """
+    Evalúa el agente entrenado en el entorno especificado.
+
+    Parámetros:
+    -----------
+    env : gym.Env
+        El entorno de prueba.
+    policy_net : DQN
+        El modelo DQN entrenado.
+    num_episodes : int
+        Número de episodios de prueba.
+    device : torch.device
+        El dispositivo (CPU o GPU) en el cual se probará el modelo.
+    render : bool, opcional
+        Si se debe renderizar el entorno durante la prueba (por defecto False).
+
+    Retorna:
+    --------
+    None
+    """
     total_rewards = []
 
     for episode in range(num_episodes):
@@ -33,5 +53,5 @@ def evaluate_agent(env, policy_net, num_episodes, device, render=False):
 
     plt.bar(range(num_episodes), total_rewards)
     plt.axhline(avg_reward, color="r", linestyle="--")
-    plt.savefig("runs/logs/evaluation_rewards.png")
+    plt.savefig("runs/logs/evaluation_rewards_2.png")
     plt.close()
