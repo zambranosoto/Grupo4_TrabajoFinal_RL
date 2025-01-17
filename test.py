@@ -45,6 +45,9 @@ def evaluate_agent(env, policy_net, num_episodes, device, render=False):
             if done:
                 break
 
+            # Restablecer el ruido después de cada paso
+            policy_net.reset_noise()
+
         total_rewards.append(episode_reward)
         print(f"Episode {episode}: Reward = {episode_reward}")
 
@@ -53,5 +56,5 @@ def evaluate_agent(env, policy_net, num_episodes, device, render=False):
 
     plt.bar(range(num_episodes), total_rewards)
     plt.axhline(avg_reward, color="r", linestyle="--")
-    plt.savefig("runs/logs/evaluation_rewards_2.png")
+    plt.savefig("runs/logs/evaluation_rewards.png")
     plt.close()

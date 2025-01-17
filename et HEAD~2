@@ -1,0 +1,30 @@
+[33mcommit 425fb515b69105f7e9eaa27501828cffc59a41cd[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m
+Author: Jose Zambrano Soto <zambranosoto@gmail.com>
+Date:   Fri Jan 17 08:08:19 2025 -0500
+
+    Versión de código con NoisyNet y comentarios
+
+ .gitignore                            |   3 [32m++[m[31m-[m
+ runs/models/seaquest_dqn_noisynet.pth | Bin [31m220924010[m -> [32m0[m bytes
+ 2 files changed, 2 insertions(+), 1 deletion(-)
+
+[33mcommit 9cb650cecd741e59e3be72c5a0cc0129d114e882[m
+Author: Jose Zambrano Soto <zambranosoto@gmail.com>
+Date:   Fri Jan 17 08:03:52 2025 -0500
+
+    Versión de código con NoisyNet y comentarios
+
+ config.py                                          |  22 [32m++[m[31m--[m
+ main.py                                            |  20 [32m+[m[31m--[m
+ model.py                                           | 144 [32m+++++++++++++++++++[m[31m--[m
+ runs/logs/evaluation_rewards.png                   | Bin [31m9955[m -> [32m11269[m bytes
+ runs/logs/losses_4.png                             | Bin [31m30575[m -> [32m29033[m bytes
+ runs/logs/rewards_4.png                            | Bin [31m67540[m -> [32m75110[m bytes
+ ...{seaquest_dqn.pth => seaquest_dqn_e-greedy.pth} | Bin
+ ...quest_dqn_2.pth => seaquest_dqn_e-greedy_2.pth} | Bin
+ ...quest_dqn_4.pth => seaquest_dqn_e-greedy_4.pth} | Bin
+ runs/models/seaquest_dqn_noisynet.pth              | Bin [31m0[m -> [32m220924010[m bytes
+ test.py                                            |   5 [32m+[m[31m-[m
+ train.py                                           |  33 [32m+++[m[31m--[m
+ util.py                                            |   8 [32m+[m[31m-[m
+ 13 files changed, 184 insertions(+), 48 deletions(-)

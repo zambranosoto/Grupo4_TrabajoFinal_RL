@@ -107,7 +107,7 @@ class ReplayBuffer:
         """
         return len(self.buffer)
 
-def plot_metrics(rewards, losses, save_path="runs/logs"):
+def plot_metrics(rewards, losses, exploration_type, save_path="runs/logs"):
     """
     Grafica las recompensas y pérdidas durante el entrenamiento.
 
@@ -117,6 +117,8 @@ def plot_metrics(rewards, losses, save_path="runs/logs"):
         Lista de recompensas acumuladas por episodio.
     losses : list
         Lista de pérdidas acumuladas por paso.
+    exploration_type : str
+        Tipo de exploración utilizada ("e-greedy" o "noisynet").
     save_path : str
         La ruta donde se guardarán las gráficas.
     """
@@ -126,7 +128,7 @@ def plot_metrics(rewards, losses, save_path="runs/logs"):
     plt.ylabel("Total Reward")
     plt.title("Rewards over Episodes")
     plt.legend()
-    plt.savefig(f"{save_path}/rewards_4.png")
+    plt.savefig(f"{save_path}/rewards_{exploration_type}_1.png")
     plt.close()
 
     plt.figure(figsize=(10, 5))
@@ -135,5 +137,5 @@ def plot_metrics(rewards, losses, save_path="runs/logs"):
     plt.ylabel("Loss")
     plt.title("Loss over Training Steps")
     plt.legend()
-    plt.savefig(f"{save_path}/losses_4.png")
+    plt.savefig(f"{save_path}/losses_{exploration_type}_1.png")
     plt.close()

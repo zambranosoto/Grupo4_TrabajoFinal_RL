@@ -6,7 +6,6 @@ from torch.amp import autocast, GradScaler
 from util import ReplayBuffer, plot_metrics
 import numpy as np
 
-
 def train_dqn(env, policy_net, target_net, config, device):
     """
     Entrena la Red Neuronal Profunda (DQN) en el entorno especificado.
@@ -34,6 +33,7 @@ def train_dqn(env, policy_net, target_net, config, device):
     optimizer = optim.Adam(policy_net.parameters(), lr=config["lr"])
     buffer = ReplayBuffer(config["buffer_size"])
     rewards, losses = [], []
+    exploration_type = config["exploration_type"]
     lives = 4
 
     for episode in range(config["episodes"]):
@@ -45,18 +45,22 @@ def train_dqn(env, policy_net, target_net, config, device):
         sum_reward = 0
 
         for t in range(config["max_steps"]):
-            epsilon = max(
-                config["epsilon_min"],
-                config["epsilon_start"] - episode / config["epsilon_decay"]
-            )
-            if random.random() < epsilon:
-                action = env.action_space.sample()
-            else:
+            if exploration_type == "e-greedy":
+                epsilon = max(
+                    config["epsilon_min"],
+                    config["epsilon_start"] - episode / config["epsilon_decay"]
+                )
+                if random.random() < epsilon:
+                    action = env.action_space.sample()
+                else:
+                    with torch.no_grad(), autocast('cuda'):
+                        action = torch.argmax(policy_net(state)).item()
+            else:  # NoisyNet
                 with torch.no_grad(), autocast('cuda'):
                     action = torch.argmax(policy_net(state)).item()
+                policy_net.reset_noise()
 
             next_state, reward, done, is_tr, info = env.step(action)
-
             next_state = torch.FloatTensor(next_state).to(device).permute(2, 1, 0).unsqueeze(0).half()
 
             # Recompensa por sobrevivir
@@ -89,9 +93,11 @@ def train_dqn(env, policy_net, target_net, config, device):
                 losses.append(loss.item())
 
             if done:
-                print(
-                    f"Episode {episode + 1}/{config['episodes']}, Step {t + 1}/{config['max_steps']}: Reward = {episode_reward}, Epsilon = {epsilon:.3f}")
                 lives = 4
+                if exploration_type == "e-greedy":
+                    print(f"Episode {episode + 1}/{config['episodes']}, Step {t + 1}/{config['max_steps']}: Reward = {episode_reward}, Epsilon = {epsilon:.3f}")
+                else:
+                    print(f"Episode {episode + 1}/{config['episodes']}, Step {t + 1}/{config['max_steps']}: Reward = {episode_reward}, Exploration = NoisyNet")
                 break
 
         rewards.append(episode_reward)
@@ -99,14 +105,13 @@ def train_dqn(env, policy_net, target_net, config, device):
         if episode % config["target_update"] == 0:
             target_net.load_state_dict(policy_net.state_dict())
 
-        print(f"Episode {episode + 1}: Total Reward = {episode_reward}, Epsilon = {epsilon:.3f}")
+        print(f"Episode {episode + 1}: Total Reward = {episode_reward}")
 
         torch.cuda.empty_cache()  # Liberar memoria después de cada episodio
 
-    plot_metrics(rewards, losses, save_path="runs/logs")
+    plot_metrics(rewards, losses, exploration_type, save_path="runs/logs")
 
     return rewards, losses
-
 
 def compute_loss(policy_net, target_net, batch, gamma, device):
     """
